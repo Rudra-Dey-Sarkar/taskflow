@@ -135,7 +135,7 @@ export default function LoginPage() {
                                 href="/auth/register"
                                 className="text-primary hover:underline font-medium"
                             >
-                                Create one
+                                Register
                             </Link>
                         </p>
                     </CardFooter>

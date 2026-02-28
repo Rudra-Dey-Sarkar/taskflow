@@ -4,7 +4,7 @@ import { jwtVerify } from "jose";
 const JWT_SECRET = new TextEncoder().encode(
     process.env.JWT_SECRET
 );
-const COOKIE_NAME = "_taskflow_token_";
+const COOKIE_NAME = "__taskflow_token__";
 
 interface TokenPayload {
     id: string;
@@ -77,6 +77,10 @@ export async function middleware(request: NextRequest) {
 
     // Public pages
     if (pathname === "/") {
+        if (user) {
+            const redirectPath = user.user_type === "admin" ? "/admin" : "/dashboard";
+            return NextResponse.redirect(new URL(redirectPath, request.url));
+        }
         return NextResponse.next();
     }
 

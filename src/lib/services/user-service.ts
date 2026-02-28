@@ -57,46 +57,45 @@ class UserService extends BaseService {
 
     async updateUser(
         id: string,
-        data: { name?: string; password?: string }
+        data: { name?: string; password?: string; user_type?: "user" | "admin" }
     ): Promise<SafeUser | null> {
         const updates: string[] = [];
-        const values: (string | undefined)[] = [];
+        const values: any[] = [];
+
+        let paramIndex = 1;
 
         if (data.name !== undefined) {
-            updates.push("name");
+            updates.push(`name = $${paramIndex++}`);
             values.push(data.name);
         }
         if (data.password !== undefined) {
-            updates.push("password");
+            updates.push(`password = $${paramIndex++}`);
             values.push(data.password);
+        }
+        if (data.user_type !== undefined) {
+            updates.push(`user_type = $${paramIndex++}`);
+            values.push(data.user_type);
         }
 
         if (updates.length === 0) return this.findById(id);
 
-        if (data.name && data.password) {
-            const rows = await this.sql`
-        UPDATE users SET name = ${data.name}, password = ${data.password}
-        WHERE id = ${id}
-        RETURNING id, user_type, name, email, created_at
-      `;
-            return (rows[0] as SafeUser) || null;
-        } else if (data.name) {
-            const rows = await this.sql`
-        UPDATE users SET name = ${data.name}
-        WHERE id = ${id}
-        RETURNING id, user_type, name, email, created_at
-      `;
-            return (rows[0] as SafeUser) || null;
-        } else if (data.password) {
-            const rows = await this.sql`
-        UPDATE users SET password = ${data.password}
-        WHERE id = ${id}
-        RETURNING id, user_type, name, email, created_at
-      `;
-            return (rows[0] as SafeUser) || null;
-        }
+        values.push(id);
+        const queryText = `
+            UPDATE users 
+            SET ${updates.join(", ")}
+            WHERE id = $${paramIndex}
+            RETURNING id, user_type, name, email, created_at
+        `;
 
-        return null;
+        try {
+            // Because neon tagged templates can be tricky with dynamic queries, 
+            // we will use the same bypassing string text approach we used in migrating
+            const rows = await (this.sql as any)([queryText], ...values);
+            return (rows[0] as SafeUser) || null;
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
     }
 }
 

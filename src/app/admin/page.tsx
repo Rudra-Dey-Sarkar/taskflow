@@ -6,6 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
     Loader2,
@@ -17,6 +28,7 @@ import {
     Shield,
     Mail,
     Calendar,
+    Pencil,
 } from "lucide-react";
 
 interface User {
@@ -45,6 +57,18 @@ export default function AdminPage() {
     const [isLoadingTasks, setIsLoadingTasks] = useState(true);
     const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
     const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
+
+    // Edit User State
+    const [editUserOpen, setEditUserOpen] = useState(false);
+    const [isEditingUser, setIsEditingUser] = useState(false);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [editUserData, setEditUserData] = useState({ name: "", user_type: "user", password: "" });
+
+    // Edit Task State
+    const [editTaskOpen, setEditTaskOpen] = useState(false);
+    const [isEditingTask, setIsEditingTask] = useState(false);
+    const [editingTask, setEditingTask] = useState<TaskWithUser | null>(null);
+    const [editTaskData, setEditTaskData] = useState({ name: "", description: "" });
 
     const fetchUsers = useCallback(async () => {
         try {
@@ -133,6 +157,77 @@ export default function AdminPage() {
         }
     };
 
+    // User Edit Handlers
+    const openEditUser = (user: User) => {
+        setEditingUser(user);
+        setEditUserData({ name: user.name, user_type: user.user_type, password: "" });
+        setEditUserOpen(true);
+    };
+
+    const handleEditUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingUser) return;
+        setIsEditingUser(true);
+        try {
+            const bodyData: any = { name: editUserData.name, user_type: editUserData.user_type };
+            if (editUserData.password) {
+                bodyData.password = editUserData.password;
+            }
+
+            const res = await fetch(`/api/v1/users/${editingUser.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bodyData),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                toast.error(err.error || "Failed to update user");
+                return;
+            }
+            toast.success("User updated successfully");
+            setEditUserOpen(false);
+            setEditingUser(null);
+            fetchUsers();
+        } catch {
+            toast.error("Failed to update user");
+        } finally {
+            setIsEditingUser(false);
+        }
+    };
+
+    // Task Edit Handlers
+    const openEditTask = (task: TaskWithUser) => {
+        setEditingTask(task);
+        setEditTaskData({ name: task.name, description: task.description });
+        setEditTaskOpen(true);
+    };
+
+    const handleEditTask = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingTask) return;
+        setIsEditingTask(true);
+        try {
+            const res = await fetch(`/api/v1/tasks/${editingTask.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(editTaskData),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                toast.error(err.error || "Failed to update task");
+                return;
+            }
+            toast.success("Task updated successfully");
+            setEditTaskOpen(false);
+            setEditingTask(null);
+            fetchTasks();
+        } catch {
+            toast.error("Failed to update task");
+        } finally {
+            setIsEditingTask(false);
+        }
+    };
+
     const totalTasks = tasks.length;
     const completedTasks = tasks.filter((t) => t.is_complete).length;
     const totalUsers = users.length;
@@ -156,20 +251,20 @@ export default function AdminPage() {
                 {/* Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <Card>
-                        <CardContent className="flex items-center gap-3 p-4">
-                            <Users className="h-5 w-5 text-blue-500" />
+                        <CardContent className="flex items-center gap-3 p-4 sm:p-6">
+                            <Users className="h-5 w-5 sm:h-8 sm:w-8 text-blue-500" />
                             <div>
-                                <p className="text-2xl font-bold">{totalUsers}</p>
-                                <p className="text-xs text-muted-foreground">Users</p>
+                                <p className="text-xl sm:text-2xl font-bold">{totalUsers}</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground">Users</p>
                             </div>
                         </CardContent>
                     </Card>
                     <Card>
-                        <CardContent className="flex items-center gap-3 p-4">
-                            <Shield className="h-5 w-5 text-purple-500" />
+                        <CardContent className="flex items-center gap-3 p-4 sm:p-6">
+                            <Shield className="h-5 w-5 sm:h-8 sm:w-8 text-purple-500" />
                             <div>
-                                <p className="text-2xl font-bold">{adminCount}</p>
-                                <p className="text-xs text-muted-foreground">Admins</p>
+                                <p className="text-xl sm:text-2xl font-bold">{adminCount}</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground">Admins</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -224,10 +319,10 @@ export default function AdminPage() {
                                         {users.map((user) => (
                                             <div
                                                 key={user.id}
-                                                className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors gap-4"
                                             >
                                                 <div className="flex items-center gap-4">
-                                                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                                    <div className="h-10 w-10 rounded-full bg-primary/10 flex shrink-0 items-center justify-center">
                                                         <span className="text-sm font-semibold text-primary">
                                                             {user.name.charAt(0).toUpperCase()}
                                                         </span>
@@ -245,7 +340,7 @@ export default function AdminPage() {
                                                                 {user.user_type}
                                                             </Badge>
                                                         </div>
-                                                        <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                                                        <div className="sm:flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                                                             <span className="flex items-center gap-1">
                                                                 <Mail className="h-3 w-3" />
                                                                 {user.email}
@@ -258,19 +353,28 @@ export default function AdminPage() {
                                                     </div>
                                                 </div>
                                                 {user.user_type !== "admin" && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="text-destructive hover:text-destructive"
-                                                        onClick={() => handleDeleteUser(user.id, user.name)}
-                                                        disabled={deletingUserId === user.id}
-                                                    >
-                                                        {deletingUserId === user.id ? (
-                                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                                        ) : (
-                                                            <Trash2 className="h-4 w-4" />
-                                                        )}
-                                                    </Button>
+                                                    <div className="flex items-center gap-2 self-end sm:self-auto">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => openEditUser(user)}
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-destructive hover:text-destructive"
+                                                            onClick={() => handleDeleteUser(user.id, user.name)}
+                                                            disabled={deletingUserId === user.id}
+                                                        >
+                                                            {deletingUserId === user.id ? (
+                                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                            ) : (
+                                                                <Trash2 className="h-4 w-4" />
+                                                            )}
+                                                        </Button>
+                                                    </div>
                                                 )}
                                             </div>
                                         ))}
@@ -300,9 +404,9 @@ export default function AdminPage() {
                                         {tasks.map((task) => (
                                             <div
                                                 key={task.id}
-                                                className="flex items-start justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors gap-4"
                                             >
-                                                <div className="flex items-start gap-3 flex-1">
+                                                <div className="flex items-start gap-3 flex-1 overflow-hidden">
                                                     <button
                                                         type="button"
                                                         onClick={() => handleToggleTask(task)}
@@ -340,19 +444,28 @@ export default function AdminPage() {
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-destructive hover:text-destructive ml-2"
-                                                    onClick={() => handleDeleteTask(task.id)}
-                                                    disabled={deletingTaskId === task.id}
-                                                >
-                                                    {deletingTaskId === task.id ? (
-                                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                                    ) : (
-                                                        <Trash2 className="h-4 w-4" />
-                                                    )}
-                                                </Button>
+                                                <div className="flex items-center gap-2 self-end sm:self-auto">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => openEditTask(task)}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-destructive hover:text-destructive"
+                                                        onClick={() => handleDeleteTask(task.id)}
+                                                        disabled={deletingTaskId === task.id}
+                                                    >
+                                                        {deletingTaskId === task.id ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="h-4 w-4" />
+                                                        )}
+                                                    </Button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -361,6 +474,104 @@ export default function AdminPage() {
                         </Card>
                     </TabsContent>
                 </Tabs>
+
+                {/* Edit User Dialog */}
+                <Dialog open={editUserOpen} onOpenChange={setEditUserOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit User</DialogTitle>
+                            <DialogDescription>Update user details or alter permissions</DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleEditUser}>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="user-name">Name</Label>
+                                    <Input
+                                        id="user-name"
+                                        required
+                                        value={editUserData.name}
+                                        onChange={(e) =>
+                                            setEditUserData((prev) => ({ ...prev, name: e.target.value }))
+                                        }
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="user-type">Role</Label>
+                                    <select
+                                        id="user-type"
+                                        className="flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                        value={editUserData.user_type}
+                                        onChange={(e) =>
+                                            setEditUserData((prev) => ({ ...prev, user_type: e.target.value as "user" | "admin" }))
+                                        }
+                                    >
+                                        <option value="user" className="text-black dark:text-white dark:bg-zinc-900">User</option>
+                                        <option value="admin" className="text-black dark:text-white dark:bg-zinc-900">Admin</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="user-pass">New Password (optional)</Label>
+                                    <Input
+                                        id="user-pass"
+                                        type="password"
+                                        placeholder="Leave blank to keep same"
+                                        value={editUserData.password}
+                                        onChange={(e) =>
+                                            setEditUserData((prev) => ({ ...prev, password: e.target.value }))
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button type="submit" disabled={isEditingUser}>
+                                    {isEditingUser ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                    Save Changes
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Edit Task Dialog */}
+                <Dialog open={editTaskOpen} onOpenChange={setEditTaskOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit Task</DialogTitle>
+                            <DialogDescription>Update task details</DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleEditTask}>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="edit-task-name">Task Name</Label>
+                                    <Input
+                                        id="edit-task-name"
+                                        required
+                                        value={editTaskData.name}
+                                        onChange={(e) =>
+                                            setEditTaskData((prev) => ({ ...prev, name: e.target.value }))
+                                        }
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="edit-task-desc">Description</Label>
+                                    <Textarea
+                                        id="edit-task-desc"
+                                        value={editTaskData.description}
+                                        onChange={(e) =>
+                                            setEditTaskData((prev) => ({ ...prev, description: e.target.value }))
+                                        }
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button type="submit" disabled={isEditingTask}>
+                                    {isEditingTask ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                    Save Changes
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </main>
         </div>
     );

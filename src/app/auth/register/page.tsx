@@ -156,7 +156,7 @@ export default function RegisterPage() {
                                 href="/auth/login"
                                 className="text-primary hover:underline font-medium"
                             >
-                                Sign in
+                                Login
                             </Link>
                         </p>
                     </CardFooter>

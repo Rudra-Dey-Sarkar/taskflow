@@ -17,7 +17,7 @@ export async function DELETE(
 
         if (currentUser.user_type !== "admin") {
             return NextResponse.json(
-                { error: "Forbidden: Admin access required" },
+                { error: "Forbidden:- Admin access required" },
                 { status: 403 }
             );
         }
@@ -77,7 +77,7 @@ export async function GET(
 
         if (currentUser.user_type !== "admin") {
             return NextResponse.json(
-                { error: "Forbidden: Admin access required" },
+                { error: "Forbidden:- Admin access required" },
                 { status: 403 }
             );
         }
@@ -102,7 +102,61 @@ export async function GET(
 
         return NextResponse.json({ user }, { status: 200 });
     } catch (error) {
-        console.error("Get user error:", error);
+        console.error("Get user error:-", error);
+        return NextResponse.json(
+            { error: "Internal server error" },
+            { status: 500 }
+        );
+    }
+}
+
+export async function PUT(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const currentUser = await getCurrentUser();
+        if (!currentUser || currentUser.user_type !== "admin") {
+            return NextResponse.json(
+                { error: "Forbidden:- Admin access required" },
+                { status: 403 }
+            );
+        }
+
+        const { id } = await params;
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(id)) {
+            return NextResponse.json(
+                { error: "Invalid user ID format" },
+                { status: 400 }
+            );
+        }
+
+        const body = await request.json();
+        const { name, user_type, password } = body;
+
+        let hashedPassword = undefined;
+        if (password) {
+            const bcrypt = await import("bcryptjs");
+            hashedPassword = await bcrypt.hash(password, 10);
+        }
+
+        const updatedUser = await userService.updateUser(id, {
+            name,
+            user_type,
+            password: hashedPassword,
+        });
+
+        if (!updatedUser) {
+            return NextResponse.json(
+                { error: "Failed to update user or user not found" },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({ user: updatedUser }, { status: 200 });
+    } catch (error) {
+        console.error("Update user error:-", error);
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }

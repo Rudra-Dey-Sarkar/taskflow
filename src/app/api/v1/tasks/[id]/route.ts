@@ -108,7 +108,7 @@ export async function PUT(
     } catch (error) {
         if (error instanceof Error && error.message === "FORBIDDEN") {
             return NextResponse.json(
-                { error: "Forbidden: You can only modify your own tasks" },
+                { error: "Forbidden:- You can only modify your own tasks" },
                 { status: 403 }
             );
         }

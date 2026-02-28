@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Lock,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function HomePage() {
   return (
@@ -24,7 +25,8 @@ export default function HomePage() {
                 TaskFlow
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Link href="/auth/login">
                 <Button variant="ghost" size="sm">
                   Sign In
