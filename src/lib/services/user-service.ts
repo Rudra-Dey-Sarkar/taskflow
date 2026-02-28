@@ -59,41 +59,26 @@ class UserService extends BaseService {
         id: string,
         data: { name?: string; password?: string; user_type?: "user" | "admin" }
     ): Promise<SafeUser | null> {
-        const updates: string[] = [];
-        const values: (string | "user" | "admin")[] = [];
+        const currentUser = await this.sql`
+            SELECT name, password, user_type FROM users WHERE id = ${id}
+        `;
 
-        let paramIndex = 1;
+        if (currentUser.length === 0) return null;
 
-        if (data.name !== undefined) {
-            updates.push(`name = $${paramIndex++}`);
-            values.push(data.name);
-        }
-        if (data.password !== undefined) {
-            updates.push(`password = $${paramIndex++}`);
-            values.push(data.password);
-        }
-        if (data.user_type !== undefined) {
-            updates.push(`user_type = $${paramIndex++}`);
-            values.push(data.user_type);
-        }
+        const name = data.name ?? currentUser[0].name;
+        const password = data.password ?? currentUser[0].password;
+        const userType = data.user_type ?? currentUser[0].user_type;
 
-        if (updates.length === 0) return this.findById(id);
-
-        values.push(id);
-        const queryText = `
+        const rows = await this.sql`
             UPDATE users 
-            SET ${updates.join(", ")}
-            WHERE id = $${paramIndex}
+            SET name = ${name}, 
+                password = ${password}, 
+                user_type = ${userType}
+            WHERE id = ${id}
             RETURNING id, user_type, name, email, created_at
         `;
 
-        try {
-            const rows = await (this.sql as any)([queryText], ...values);
-            return (rows[0] as SafeUser) || null;
-        } catch (error) {
-            console.error(error);
-            return null;
-        }
+        return (rows[0] as SafeUser) || null;
     }
 }
 
