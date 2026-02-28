@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { removeAuthCookie } from "@/lib/utils/jwt";
+import { removeAuthCookie } from "@/lib/utils/cookies";
 
 export async function POST() {
     try {
