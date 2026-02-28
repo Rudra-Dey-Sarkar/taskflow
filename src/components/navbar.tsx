@@ -3,12 +3,10 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Zap, LogOut, LayoutDashboard, Shield, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "./theme-toggle";
-import { Separator } from "./ui/separator";
 
 interface User {
     id: string;

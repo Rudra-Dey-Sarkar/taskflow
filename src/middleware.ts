@@ -21,11 +21,14 @@ async function verifyTokenEdge(token: string): Promise<TokenPayload | null> {
     }
 }
 
+// authenticated users
+const AUTH_PATHS = ["/admin", "/dashboard"];
+
 // admin only
 const ADMIN_PATHS = ["/admin"];
 
 // unauthenticated users
-const AUTH_PATHS = ["/auth/login", "/auth/register"];
+const UNAUTH_PATHS = ["/auth/login", "/auth/register"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -69,8 +72,13 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // non-logged in users
+    if (!user && AUTH_PATHS.some((p) => pathname.startsWith(p))) {
+        return NextResponse.redirect(new URL("/", request.url));
+    }
+
     // logged in users
-    if (user && AUTH_PATHS.some((p) => pathname.startsWith(p))) {
+    if (user && UNAUTH_PATHS.some((p) => pathname.startsWith(p))) {
         const redirectPath = user.user_type === "admin" ? "/admin" : "/dashboard";
         return NextResponse.redirect(new URL(redirectPath, request.url));
     }

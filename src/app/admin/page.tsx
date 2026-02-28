@@ -169,7 +169,7 @@ export default function AdminPage() {
         if (!editingUser) return;
         setIsEditingUser(true);
         try {
-            const bodyData: any = { name: editUserData.name, user_type: editUserData.user_type };
+            const bodyData: Record<string, string> = { name: editUserData.name, user_type: editUserData.user_type };
             if (editUserData.password) {
                 bodyData.password = editUserData.password;
             }

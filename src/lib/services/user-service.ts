@@ -60,7 +60,7 @@ class UserService extends BaseService {
         data: { name?: string; password?: string; user_type?: "user" | "admin" }
     ): Promise<SafeUser | null> {
         const updates: string[] = [];
-        const values: any[] = [];
+        const values: (string | "user" | "admin")[] = [];
 
         let paramIndex = 1;
 
@@ -88,8 +88,6 @@ class UserService extends BaseService {
         `;
 
         try {
-            // Because neon tagged templates can be tricky with dynamic queries, 
-            // we will use the same bypassing string text approach we used in migrating
             const rows = await (this.sql as any)([queryText], ...values);
             return (rows[0] as SafeUser) || null;
         } catch (error) {
