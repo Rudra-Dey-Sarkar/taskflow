@@ -1,116 +1,138 @@
-# Prime Access Task Manager
+# TaskFlow - Task Management SaaS
 
-A secure, scalable, role-based Task Management SaaS application built with Next.js 15, TypeScript, Tailwind CSS, ShadCN UI, and Neon PostgreSQL.
+A secure, scalable, and role-based task management SaaS application built using Next.js 15, TypeScript, Tailwind CSS, ShadCN UI, and Neon PostgreSQL.
 
-## Features
+## Core Features
 
-- **Authentication**: JWT-based authentication using HTTP-only cookies and bcrypt for password hashing.
-- **Role-Based Access Control**: `user` and `admin` roles, protected by Next.js Edge Middleware.
-- **Task Management**: Full CRUD capabilities for tasks. Users manage their own tasks, while Admins have full access to view, edit, or delete any task.
-- **Admin Panel**: Dedicated dashboard for administrators to view and manage registered users and global project statistics.
-- **Modern UI**: Polished interface powered by ShadCN UI, Tailwind CSS, and Lucide Icons.
-- **API Versioning**: Scalable `v1` API route structure.
-- **Edge Compatible**: Custom JWT handling with `jose` to support Next.js Edge Runtime middleware.
+- **Authentication System**: Secure JWT-based authentication using HTTP-only cookies and bcrypt password hashing.
+- **Role-Based Access Control (RBAC)**: Distinct user and admin roles, safeguarded by Next.js Edge Middleware for routing and API protection.
+- **Task Management**: Comprehensive CRUD capabilities. Regular users manage their personal tasks, while administrators possess full oversight to view, edit, or delete any task across the platform.
+- **Administrative Dashboard**: A dedicated panel for administrators to monitor registered users, manage roles, and track overall platform statistics.
+- **Dynamic Theming**: Built-in support for light and dark modes, utilizing next-themes for seamless transitions without hydration mismatches.
+- **Modern Interface**: A polished, responsive user interface powered by ShadCN UI, Tailwind CSS, and Lucide icons.
+- **API Architecture**: A well-structured, versioned API (v1) designed for scalability.
+- **Edge Compatibility**: Custom JWT verification using the jose library to ensure full compatibility with Next.js Edge Runtime middleware.
 
 ## Technology Stack
 
-- **Frontend**: Next.js 15 (App Router), React, Tailwind CSS, ShadCN UI, React Hook Form, Zod.
-- **Backend**: Next.js Route Handlers, Node.js.
-- **Database**: Neon (Serverless PostgreSQL), plain SQL migrations.
-- **Security**: jose (Edge environment JWTs), bcryptjs.
+- **Frontend Core**: Next.js 15 (App Router), React, TypeScript
+- **Styling & UI**: Tailwind CSS, ShadCN UI, next-themes
+- **Forms & Validation**: React Hook Form, Zod
+- **Backend Architecture**: Next.js Route Handlers (Node.js/Edge environments)
+- **Database Operations**: Neon (Serverless PostgreSQL), standard pg driver for seeding and migrations
+- **Security implementation**: jose (Edge environment JWTs), bcryptjs
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- Node.js (v18+)
-- A Neon PostgreSQL Database (or any PostgreSQL instance)
+- Node.js (v18 or higher recommended)
+- A Neon PostgreSQL Database connection string (or any standard PostgreSQL instance)
 
-### Installation
+### Setup Instructions
 
-1. Clone the repository:
+1. **Clone the repository:**
    ```bash
    git clone <repository-url>
-   cd prime-access-task-manager
+   cd taskflow
    ```
 
-2. Install dependencies:
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. Configure Environment Variables:
-   Create a `.env.local` file in the root directory and add:
+3. **Configure Environment Variables:**
+   Create a `.env.local` file in the root directory and populate it with your specific credentials:
    ```env
    DATABASE_URL="postgres://<user>:<password>@<host>/<database>?sslmode=require"
-   JWT_SECRET="your_super_secret_jwt_key"
+   JWT_SECRET="your_secure_random_jwt_secret_key"
+   ADMIN_EMAIL="admin@taskflow.com"
+   ADMIN_PASSWORD="@TaskFlow9595"
    ```
 
-4. Run Database Migrations:
-   This project uses a custom migration script to keep things lightweight. Run the script to create the required tables (`users` and `tasks`):
+4. **Initialize Database and Seed Admin User:**
+   The project includes a robust seeding script that automatically runs the necessary SQL migrations to create the `users` and `tasks` tables, and provisions the initial administrator account based on your environment variables.
    ```bash
-   npm run migrate
+   npm run db-seed
    ```
-   *(Or run `npx tsx migrations/migrate.ts` manually)*
 
-5. Start the Development Server:
+5. **Start the Development Server:**
    ```bash
    npm run dev
    ```
 
-6. Open [http://localhost:3000](http://localhost:3000) and explore.
+6. **Access the Application:**
+   Open a browser and navigate to `http://localhost:3000`.
 
 ---
 
-## 🔑 Authentication & Roles
+## Authentication Flow and Roles
 
-- **Sign Up**: Create an account via `/auth/register`. New accounts default to the `user` role.
-- **Log In**: Access your account via `/auth/login`. This sets an HTTP-only JWT cookie.
-- **Promoting an Admin**: To test the admin panel, you must manually change the `user_type` column to `admin` in your PostgreSQL database for a specific user:
-  ```sql
-  UPDATE users SET user_type = 'admin' WHERE email = 'your@email.com';
-  ```
+- **Registration**: New accounts can be created via `/auth/register`. By default, all new accounts are assigned the standard `user` role.
+- **Login**: Authentication is handled at `/auth/login`. Upon success, a secure HTTP-only JWT cookie is set. Authenticated users attempting to visit the root path are automatically redirected to their respective dashboards.
+- **Admin Access**: The initial administrator account is created during the `npm run db:seed` step. Log in with those credentials to access the `/admin` panel, which provides full control over all users and tasks.
 
 ---
 
-## 📡 API Endpoints (v1)
+## Database Schema Overview
+
+The application utilizes a streamlined relational schema:
+
+**users Table:**
+- `id` (UUID, Primary Key)
+- `user_type` (VARCHAR, 'user' or 'admin')
+- `name` (VARCHAR)
+- `email` (VARCHAR, Unique)
+- `password` (VARCHAR, hashed)
+- `created_at` (TIMESTAMPTZ)
+
+**tasks Table:**
+- `id` (UUID, Primary Key)
+- `user_id` (UUID, Foreign Key referencing users.id, Cascade Delete)
+- `name` (VARCHAR)
+- `description` (TEXT)
+- `is_complete` (BOOLEAN)
+- `created_at` (TIMESTAMPTZ)
+
+---
+
+## API Endpoints (v1)
 
 ### Authentication
-- `POST /api/v1/auth/register` - Register a new user
-- `POST /api/v1/auth/login` - Authenticate and receive a JWT cookie
-- `POST /api/v1/auth/logout` - Clear the JWT cookie
-- `GET /api/v1/auth/me` - Get current authenticated user details
+- `POST /api/v1/auth/register` - Register a new user account
+- `POST /api/v1/auth/login` - Authenticate credentials and receive a JWT cookie
+- `POST /api/v1/auth/logout` - Invalidate the session by clearing the JWT cookie
+- `GET /api/v1/auth/me` - Retrieve the profile details of the currently authenticated user
 
 ### Tasks
-- `GET /api/v1/tasks` - List tasks (Users see their own, Admins see all)
-- `POST /api/v1/tasks` - Create a new task
-- `GET /api/v1/tasks/:id` - Get a specific task
-- `PUT /api/v1/tasks/:id` - Update a task (Users can update own, Admins can update any)
-- `DELETE /api/v1/tasks/:id` - Delete a task (Users can delete own, Admins can delete any)
+- `GET /api/v1/tasks` - List tasks (Users retrieve their own; Admins retrieve all system tasks)
+- `POST /api/v1/tasks` - Create a new task entry
+- `GET /api/v1/tasks/[id]` - Retrieve details for a specific task
+- `PUT /api/v1/tasks/[id]` - Update task details or completion status
+- `DELETE /api/v1/tasks/[id]` - Remove a task from the system
 
-### Users (Admin Only)
-- `GET /api/v1/users` - List all registered users
-- `GET /api/v1/users/:id` - Get a specific user profile
-- `DELETE /api/v1/users/:id` - Delete a user and their associated tasks
+### Users (Administrative Access Only)
+- `GET /api/v1/users` - Retrieve a list of all registered users
+- `GET /api/v1/users/[id]` - Retrieve profile details for a specific user
+- `PUT /api/v1/users/[id]` - Modify a user's details, including role escalation or password resets
+- `DELETE /api/v1/users/[id]` - Permanently remove a user and cascade delete all their associated tasks
 
 ---
 
-## 🏗️ Architecture & Scalability
+## Architecture and Scalability Considerations
 
-This application is designed with scalability in mind:
+This application is architected to support future growth and maintainability:
 
-1. **Service Layer Pattern**: Database logic is isolated in `/src/lib/services`. This allows controllers/route-handlers to remain thin. If the database provider changes or a caching layer (like Redis) is introduced, only the services need to be modified.
-2. **Stateless Authentication**: JWTs stored in HTTP-only cookies prevent XSS while allowing the application backend to remain completely stateless.
-3. **Edge Middleware**: Using `jose` instead of `jsonwebtoken` ensures that authentication verification happens at the Next.js Edge layer. Unauthorized requests are rejected before hitting the core application server, reducing server load.
-4. **Serverless Database**: Integration with Neon PostgreSQL seamlessly scales connections for serverless functions, preventing connection exhaustion typical in traditional standard RDS instances.
+1. **Service Layer Abstraction**: Database interactions are isolated within `/src/lib/services`. This keeps route handlers focused entirely on HTTP logic. If the underlying database technology changes or a caching mechanism (like Redis) is introduced, modifications are confined to the service layer.
+2. **Stateless Authentication Mechanism**: By storing JWTs in HTTP-only cookies, the application mitigates XSS vulnerabilities while allowing the backend to operate without maintaining server-side session state, facilitating horizontal scaling.
+3. **Edge-Optimized Middleware**: Utilizing the `jose` library ensures that JWT verification executes efficiently at the Next.js Edge layer. Unauthorized traffic is intercepted and redirected before ever reaching the core application server, significantly reducing unnecessary compute load.
+4. **Serverless Database Integration**: The integration with Neon PostgreSQL handles connection pooling effectively for serverless environments, preventing the connection exhaustion issues frequently encountered when connecting serverless functions to traditional RDS instances.
 
-## 🛡️ Validation & Security
+## Validation and Security Measures
 
-- **Inputs**: All incoming API requests are strictly validated using `Zod` schemas.
-- **Passwords**: Hashed with `bcryptjs` with salt round factors.
-- **Data Protection**: APIs check the `user_id` on the fetched resources vs the `user_id` inside the verified JWT to prevent IDOR (Insecure Direct Object Reference).
-
-## Developed For
-Backend Developer (Intern) Assignment.
+- **Input Sanitization and Validation**: All incoming API requests are rigorously validated against Zod schemas before processing.
+- **Cryptographic Hashing**: User passwords are encrypted using bcryptjs with appropriate salt rounds.
+- **Authorization Checks**: APIs perform strict validations comparing the `user_id` of the requested resource against the `id` contained within the verified JWT to prevent Insecure Direct Object Reference (IDOR) vulnerabilities. Admins possess bypass privileges for these ownership checks.

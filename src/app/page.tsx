@@ -27,16 +27,16 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <Link href="/auth/login">
-                <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/auth/login">
                   Sign In
-                </Button>
-              </Link>
-              <Link href="/auth/register">
-                <Button size="sm" className="gap-1">
+                </Link>
+              </Button>
+              <Button size="sm" className="gap-1" asChild>
+                <Link href="/auth/register">
                   Get Started <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -45,7 +45,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm text-muted-foreground mb-6 bg-muted/50">
               <Lock className="h-3.5 w-3.5 mr-2" />
@@ -64,16 +64,16 @@ export default function HomePage() {
               Built for teams that value security and scalability.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/auth/register">
-                <Button size="lg" className="gap-2 px-8">
+              <Button size="lg" className="gap-2 px-8" asChild>
+                <Link href="/auth/register">
                   Start Managing Tasks <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/auth/login">
-                <Button variant="outline" size="lg" className="px-8">
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" className="px-8" asChild>
+                <Link href="/auth/login">
                   Sign In
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

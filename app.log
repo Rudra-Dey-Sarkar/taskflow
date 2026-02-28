@@ -1,0 +1,23 @@
+[2024-05-18T10:14:22.105Z] INFO [NextServer] Starting development server on http://localhost:3000
+[2024-05-18T10:14:23.011Z] INFO [NextServer] ✓ Compiled / page in 892ms
+[2024-05-18T10:14:35.402Z] INFO [API] POST /api/v1/auth/register - 201 Created (142ms)
+[2024-05-18T10:14:35.809Z] INFO [API] POST /api/v1/auth/login - 200 OK (85ms)
+[2024-05-18T10:14:36.101Z] INFO [NextServer] ✓ Compiled /dashboard/page in 312ms
+[2024-05-18T10:14:36.405Z] INFO [API] GET /api/v1/auth/me - 200 OK (55ms)
+[2024-05-18T10:14:36.410Z] INFO [API] GET /api/v1/tasks - 200 OK (62ms)
+[2024-05-18T10:15:12.788Z] INFO [API] POST /api/v1/tasks - 201 Created (78ms)
+[2024-05-18T10:15:12.855Z] INFO [API] GET /api/v1/tasks - 200 OK (45ms)
+[2024-05-18T10:15:45.102Z] INFO [API] PUT /api/v1/tasks/uuid-foo-87ds-x3v2 - 200 OK (68ms)
+[2024-05-18T10:15:45.180Z] INFO [API] GET /api/v1/tasks - 200 OK (42ms)
+[2024-05-18T10:16:02.333Z] WARN [Middleware] Unauthorized access attempt to /admin
+[2024-05-18T10:16:05.104Z] INFO [API] POST /api/v1/auth/logout - 200 OK (30ms)
+[2024-05-18T10:16:15.550Z] INFO [API] POST /api/v1/auth/login - 200 OK (88ms) - Role: Admin
+[2024-05-18T10:16:16.801Z] INFO [NextServer] ✓ Compiled /admin/page in 405ms
+[2024-05-18T10:16:17.102Z] INFO [API] GET /api/v1/auth/me - 200 OK (54ms)
+[2024-05-18T10:16:17.115Z] INFO [API] GET /api/v1/users - 200 OK (88ms)
+[2024-05-18T10:16:17.120Z] INFO [API] GET /api/v1/tasks - 200 OK (95ms)
+[2024-05-18T10:17:34.901Z] INFO [API] PUT /api/v1/users/uuid-bar-91zx-k8p4 - 200 OK (112ms) - Escalated user_type
+[2024-05-18T10:17:35.010Z] INFO [API] GET /api/v1/users - 200 OK (75ms)
+[2024-05-18T10:18:22.450Z] INFO [API] DELETE /api/v1/tasks/uuid-foo-87ds-x3v2 - 200 OK (85ms)
+[2024-05-18T10:18:22.510Z] INFO [API] GET /api/v1/tasks - 200 OK (48ms)
+[2024-05-18T10:19:05.111Z] INFO [API] POST /api/v1/auth/logout - 200 OK (28ms)
