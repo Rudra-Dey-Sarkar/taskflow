@@ -1,4 +1,4 @@
-# TaskFlow - Task Management SaaS
+# TaskFlow - Task Management Platform
 
 A secure, scalable, and role-based task management SaaS application built using Next.js 15, TypeScript, Tailwind CSS, ShadCN UI, and Neon PostgreSQL.
 
